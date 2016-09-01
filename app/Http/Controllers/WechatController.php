@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use EasyWeChat\Message\Text;
 use App\WeChat\Response;
-use App\WeChat\tour;
-use App\WeChat\usage;
+use App\WeChat\Tour;
+
 //use App\Http\Requests;
 use Log;
 
@@ -56,7 +56,7 @@ class WechatController extends Controller
                             #重复关注事件
                             $eventkey = $message->EventKey;
                             if ($eventkey == "1336") {
-                                $tour = new tour();
+                                $tour = new Tour();
                                 $content = new Text();
                                 $content->content = $tour->verification_subscribe($openid, '1');
                                 return $content;

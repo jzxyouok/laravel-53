@@ -10,7 +10,7 @@ namespace App\WeChat;
 
 use DB;
 
-class tour
+class Tour
 {
     /**
      * 预约核销

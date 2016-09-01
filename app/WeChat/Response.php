@@ -28,7 +28,8 @@ class Response
     public function __construct($message)
     {
         $this->app = app('wechat');
-        $this->usage = new usage();
+        
+        $this->usage = new Usage();
         /*       $userService = $this->app->user;
                $this->openid = $userService->get($message->FromUserName)->openid;*/
     }
@@ -74,7 +75,7 @@ class Response
                 break;
             case 'hx':
                 $content = new Text();
-                $tour = new tour();
+                $tour = new Tour();
                 $content->content = $tour->verification_subscribe($openid, '1');
                 break;
             case '天气':
@@ -470,8 +471,8 @@ class Response
      */
     public function insert_user_unionid($openid, $unionid)
     {
-        if (!check_unionid($openid)) {//检查union表中是否存在
-            DB::table(wx_user_unionid)
+        if (!$this->check_unionid($openid)) {//检查union表中是否存在
+            DB::table('wx_user_unionid')
                 ->insert(['wx_openid' => $openid, "wx_unionid" => $unionid]);
         }
     }
@@ -588,7 +589,7 @@ class Response
    */
     public function query_wite_info($openid)
     {
-        $tour=new tour();
+        $tour=new Tour();
         $result = DB::table('tour_project_wait_detail')
             ->where('wx_openid', $openid)
             ->whereDate('addtime', '=', date('Y-m-d'))
