@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use EasyWeChat\Message\Text;
 use App\WeChat\Response;
 use App\WeChat\tour;
+use App\WeChat\usage;
 //use App\Http\Requests;
 use Log;
 
