@@ -14,7 +14,7 @@ use EasyWeChat\Foundation\Application;
 use DB;
 use EasyWeChat\Message\News;
 use EasyWeChat\Message\Text;
-use App\Http\Requests;
+//use App\Http\Requests;
 use Crypt;
 
 class Response
