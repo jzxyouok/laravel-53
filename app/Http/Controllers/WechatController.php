@@ -8,7 +8,7 @@ use App\WeChat\Response;
 use App\WeChat\tour;
 use EasyWeChat\Message\Text;
 
-use App\Http\Requests;
+//use App\Http\Requests;
 
 class WechatController extends Controller
 {
