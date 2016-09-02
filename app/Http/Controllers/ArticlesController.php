@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 //use App\Http\Requests;
 use DB;
 use App\WeChat;
+use App\User;
 use App\WeChat\Tour;
 //use App\Http\Requests;
 
@@ -40,7 +41,7 @@ class ArticlesController extends Controller
 
     public function info()
     {
-        $row_news = DB::table('wx_article')
+/*        $row_news = DB::table('wx_article')
             ->where('msgtype', 'news')
             ->where('focus', '1')
             ->where('audit', '1')
@@ -49,8 +50,11 @@ class ArticlesController extends Controller
             ->whereDate('startdate', '<=', date('Y-m-d'))
             ->whereDate('enddate', '>=', date('Y-m-d'))
             ->first();
-        return $row_news;
+        return $row_news;*/
 
+
+        $users = App\User::popular()->active()->orderBy('created_at')->get();
+        return $users;
     }
 
 

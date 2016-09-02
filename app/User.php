@@ -26,4 +26,14 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function scopePopular($query)
+    {
+        return $query->where('votes', '>', 100);
+    }
+    public function scopeActive($query)
+    {
+        return $query->where('active', 1);
+    }
+    
 }
