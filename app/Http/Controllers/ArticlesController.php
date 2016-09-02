@@ -43,7 +43,7 @@ class ArticlesController extends Controller
     {
        $row_news = DB::table('wx_article')
             ->where('msgtype', 'news')
-            ->publish()
+            ->popular()
             ->get();
         return $row_news;
 
