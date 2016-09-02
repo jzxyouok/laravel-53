@@ -24,15 +24,12 @@ class Response
     public $app;
     public $usage;
     public $openid;
-    protected $content;
 
     public function __construct($message)
     {
         $this->app = app('wechat');
         
         $this->usage = new Usage();
-
-        $this->content=new Text();
         /*       $userService = $this->app->user;
                $this->openid = $userService->get($message->FromUserName)->openid;*/
     }
@@ -51,17 +48,17 @@ class Response
         $openid = $userService->get($message->FromUserName)->openid;
         switch ($keyword) {
             case "a":
-                //$content = new Text();
+                $content = new Text();
                 if ($this->usage->get_openid_info($openid)->eventkey) {
-                    $this->content->content = $this->usage->get_openid_info($openid)->eventkey;
+                    $content->content = $this->usage->get_openid_info($openid)->eventkey;
                 } else {
-                    $this->content->content = '无eventkey';
+                    $content->content = '无eventkey';
                 }
 //                $content->content = $app->access_token->getToken();
                 break;
             case "预约":
                 $content=new Text();
-                $this->content->content=$this->query_wite_info($openid);
+                $content->content=$this->query_wite_info($openid);
                 break;
             case 's':
                 $content = new News();
@@ -72,25 +69,24 @@ class Response
                 $this->app->staff->message([$content])->to($openid)->send();
                 break;
             case 'd':
-//                $content = new Text();
+                $content = new Text();
                 $info = $this->usage->get_openid_info('o2e-YuBgnbLLgJGMQykhSg_V3VRI');
-                $this->content->content = $info->eventkey;
+                $content->content = $info->eventkey;
                 break;
             case 'hx':
-//                $content = new Text();
+                $content = new Text();
                 $tour = new Tour();
-                $this->content->content = $tour->verification_subscribe($openid, '1');
+                $content->content = $tour->verification_subscribe($openid, '1');
                 break;
             case '天气':
-//                $content = new Text();
-                $this->content->content = $this->get_weather_info();
+                $content = new Text();
+                $content->content = $this->get_weather_info();
                 break;
             default:
-//                $content=new Text();
-                $this->content->content = $this->request_keyword($openid, $keyword);
+                $content = $this->request_keyword($openid, $keyword);
                 break;
         }
-        return $this->content;
+        return $content;
     }
 
     /**
@@ -306,10 +302,10 @@ class Response
                 $content[] = $new;
             }
         } else {
-//            $content = new Text();
-            $this->content->content = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
+            $content = new Text();
+            $content->content = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
         }
-        return $this->content;
+        return $content;
     }
 
     /**
@@ -340,8 +336,8 @@ class Response
                 break;
         }
         foreach ($row as $result) {
-//            $content = new Text();
-            $this->content->content = $result->content;
+            $content = new Text();
+            $content->content = $result->content;
             $this->app->staff->message($content)->by('1001@u_hengdian')->to($openid)->send();
         }
     }
