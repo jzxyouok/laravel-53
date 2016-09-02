@@ -264,6 +264,7 @@ class Response
     private function check_keyword_message($eventkey, $type, $keyword)
     {
 //        $db = new DB();
+        $keyword = $this->check_keywowrd($keyword);
         $flag = false;
         switch ($type) {
             case "news":
@@ -464,6 +465,7 @@ class Response
                     ->get();
                 break;
             case 2:
+                $keyword = $this->check_keywowrd($keyword);
                 $row = DB::table('wx_txt_request')
                     ->where('keyword', 'like', '%' . $keyword . '%')
                     ->where(function ($query) use ($eventkey) {
@@ -502,6 +504,7 @@ class Response
                     ->get();
                 break;
             case "2":
+                $keyword = $this->check_keywowrd($keyword);
                 $row = DB::table('wx_voice_request')
                     ->where('keyword', 'like', '%' . $keyword . '%')
                     ->where(function ($query) use ($eventkey) {
