@@ -41,20 +41,15 @@ class ArticlesController extends Controller
 
     public function info()
     {
-/*        $row_news = DB::table('wx_article')
+       $row_news = DB::table('wx_article')
             ->where('msgtype', 'news')
-            ->where('focus', '1')
-            ->where('audit', '1')
-            ->where('del', '0')
-            ->popular()
-            ->whereDate('startdate', '<=', date('Y-m-d'))
-            ->whereDate('enddate', '>=', date('Y-m-d'))
-            ->first();
-        return $row_news;*/
+            ->publish()
+            ->get();
+        return $row_news;
 
 
-        $users = \App\User::popular()->active()->orderBy('created_at')->get();
-        return $users;
+/*        $users = \App\User::popular()->active()->orderBy('created_at')->get();
+        return $users;*/
     }
 
 

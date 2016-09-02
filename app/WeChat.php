@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class WeChat extends Model
 {
     //
-    public function scopePopular($query)
+    public function scopePublish($query)
     {
         return $query->where('online', '1');
     }
