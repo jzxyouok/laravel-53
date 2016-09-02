@@ -53,7 +53,7 @@ class ArticlesController extends Controller
         return $row_news;*/
 
 
-        $users = App\User::popular()->active()->orderBy('created_at')->get();
+        $users = \App\User::popular()->active()->orderBy('created_at')->get();
         return $users;
     }
 
