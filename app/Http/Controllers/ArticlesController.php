@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\WeChat\Response;
 use Illuminate\Http\Request;
 
 //use App\Http\Requests;
@@ -38,36 +39,17 @@ class ArticlesController extends Controller
 
     public function info()
     {
-        $tour=new Tour();
-        /*        $row = $db->query("select * from tour_project_wait_detail WHERE wx_openid=:wx_openid AND date(addtime)=:temptime",
-                    array("wx_openid" => $fromUsername, "temptime" => date("Y-m-d")));*/
-        $result = DB::table('tour_project_wait_detail')
-            ->where('wx_openid', 'opUv9v977Njll_YHpZYMymxI_aPE')
-            ->whereDate('addtime', '=', date('Y-m-d'))
-            ->first();
-        if (!$result) {
-//            $responseMsg->responseV_Text($fromUsername, "您好，您今天没有预约。");
-            $content = "您好，您今天没有预约。";
-        } else {
-//            foreach ($row as $result) {
-            $project_id = $result->project_id;
+        $flag = "不包含";
+        $row = DB::table('wx_request_keyword')
+            ->orderBy('id', 'asc')->get();
 
-            $project_name = $tour->get_project_name($project_id);
-            $zone_name = $tour->get_zone_name($project_id, "2");
-            $datetime = date($result->addtime);
-            $starttime = date("H:i", strtotime($result->addtime) + 3600);
-//                $endtime = date("H:i", strtotime($result->addtime) + 7200);
-            if ($result->used == 0) {
-                $used = "未使用";
-            } else {
-                $used = "已使用";
+        foreach ($row as $result) {
+            if (@strstr('sda', $result->keyword) != '') {
+                $flag = $result->keyword;
+                break;
             }
-            $str = "您预约了" . $datetime . $zone_name . "景区" . $project_name . "项目;\n预约时间：" . $starttime . "---16：30.状态：" . $used;
-//                $responseMsg->responseV_Text($fromUsername, $str);
-            $content = $str;
         }
-//        }
-        return $content;
+        return $flag;
     }
 
 }

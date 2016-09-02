@@ -302,8 +302,8 @@ class Response
                 $content[] = $new;
             }
         } else {
-//            $content = new Text();
-            $content = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
+            $content = new Text();
+            $content->content = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
         }
         return $content;
     }
