@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 //use App\Http\Requests;
 use DB;
+use App\WeChat;
 use App\WeChat\Tour;
 //use App\Http\Requests;
 
@@ -51,10 +52,7 @@ class ArticlesController extends Controller
         return $row_news;
 
     }
-    public function scopePopular($query)
-    {
-        return $query->where('online', '1');
-    }
+
 
 
 }
