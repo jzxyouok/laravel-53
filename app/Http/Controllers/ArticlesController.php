@@ -39,17 +39,22 @@ class ArticlesController extends Controller
 
     public function info()
     {
-        $flag = "不包含";
-        $row = DB::table('wx_request_keyword')
-            ->orderBy('id', 'asc')->get();
+        $row_news = DB::table('wx_article')
+            ->where('msgtype', 'news')
+            ->where('focus', '1')
+            ->where('audit', '1')
+            ->where('del', '0')
+            ->popular()
+            ->whereDate('startdate', '<=', date('Y-m-d'))
+            ->whereDate('enddate', '>=', date('Y-m-d'))
+            ->first();
+        return $row_news;
 
-        foreach ($row as $result) {
-            if (@strstr('sda', $result->keyword) != '') {
-                $flag = $result->keyword;
-                break;
-            }
-        }
-        return $flag;
     }
+    public function scopePopular($query)
+    {
+        return $query->where('online', '1');
+    }
+
 
 }

@@ -7,7 +7,9 @@
  */
 
 namespace App\WeChat;
+
 use Carbon\Carbon;
+use ClassesWithParents\D;
 use EasyWeChat\Message\Voice;
 use Illuminate\Database\Eloquent\Model;
 use EasyWeChat\Foundation\Application;
@@ -28,7 +30,7 @@ class Response
     public function __construct($message)
     {
         $this->app = app('wechat');
-        
+
         $this->usage = new Usage();
         /*       $userService = $this->app->user;
                $this->openid = $userService->get($message->FromUserName)->openid;*/
@@ -57,8 +59,8 @@ class Response
 //                $content->content = $app->access_token->getToken();
                 break;
             case "预约":
-                $content=new Text();
-                $content->content=$this->query_wite_info($openid);
+                $content = new Text();
+                $content->content = $this->query_wite_info($openid);
                 break;
             case 's':
                 $content = new News();
@@ -158,7 +160,7 @@ class Response
      * @param $focus :   1:关注    0：不关注
      * @return boolkey
      */
-    private function  check_eventkey_message($eventkey, $type, $focus)
+    private function check_eventkey_message($eventkey, $type, $focus)
     {
 //        $db = new DB();
         $flag = false;
@@ -184,6 +186,8 @@ class Response
                     ->where('eventkey', $eventkey)
                     ->where('online', '1')
                     ->where('focus', $focus)
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
                     ->first();
 
                 if ($row_txt) {
@@ -195,9 +199,93 @@ class Response
                     ->where('eventkey', $eventkey)
                     ->where('online', '1')
                     ->where('focus', $focus)
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
                     ->first();
 
                 if ($row_voice) {
+                    $flag = true;
+                }
+                break;
+            case "images":
+                $row_images = DB::table('wx_images_request')
+                    ->where('eventkey', $eventkey)
+                    ->where('online', '1')
+                    ->where('focus', $focus)
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
+                    ->first();
+                if ($row_images) {
+                    $flag = true;
+                }
+                break;
+            default:
+                break;
+
+        }
+        return $flag;
+    }
+
+
+    /**
+     * 检查关键字是否有对应的消息回复（图文、语音、文字、图片）
+     * @param $eventkey
+     * @param $type ：   news:图文    txt:文字      voice:语音
+     * @param $focus :   1:关注    0：不关注
+     * @return boolkey
+     */
+    private function check_keyword_message($eventkey, $type)
+    {
+//        $db = new DB();
+        $flag = false;
+        switch ($type) {
+            case "news":
+                $row_news = DB::table('wx_article')
+                    ->where('msgtype', 'news')
+                    ->where('audit', '1')
+                    ->where('del', '0')
+                    ->where('online', '1')
+                    ->where('eventkey', $eventkey)
+                    ->whereDate('startdate', '<=', date('Y-m-d'))
+                    ->whereDate('enddate', '>=', date('Y-m-d'))
+                    ->first();
+
+                if ($row_news) {
+                    $flag = true;
+                }
+                break;
+            case "txt":
+                $row_txt = DB::table('wx_txt_request')
+                    ->where('eventkey', $eventkey)
+                    ->where('online', '1')
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
+                    ->first();
+
+                if ($row_txt) {
+                    $flag = true;
+                }
+                break;
+            case "voice":
+                $row_voice = DB::table('wx_voice_request')
+                    ->where('eventkey', $eventkey)
+                    ->where('online', '1')
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
+                    ->first();
+
+                if ($row_voice) {
+                    $flag = true;
+                }
+                break;
+            case "images":
+                $row_images = DB::table('wx_images_request')
+                    ->where('eventkey', $eventkey)
+                    ->where('online', '1')
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
+                    ->first();
+                if ($row_images) {
                     $flag = true;
                 }
                 break;
@@ -539,7 +627,7 @@ class Response
      *
      */
 
-    public function  return_WifiConnected($postObj)
+    public function return_WifiConnected($postObj)
     {
         $openid = $postObj->FromUserName;
         $shop_id = $postObj->ShopId;
@@ -589,7 +677,7 @@ class Response
    */
     public function query_wite_info($openid)
     {
-        $tour=new Tour();
+        $tour = new Tour();
         $result = DB::table('tour_project_wait_detail')
             ->where('wx_openid', $openid)
             ->whereDate('addtime', '=', date('Y-m-d'))
