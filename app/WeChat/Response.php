@@ -100,9 +100,9 @@ class Response
     public function click_request($openid, $menuid)
     {
         $eventkey = $this->usage->get_openid_info($openid)->eventkey;
-        $content = $this->request_news($openid, $eventkey, '2', '', $menuid);
+        $this->request_news($openid, $eventkey, '2', '', $menuid);
         $this->add_menu_click_hit($openid, $menuid); //增加点击数统计
-        return $content;
+//        return $content;
     }
 
     /**
@@ -114,9 +114,36 @@ class Response
     private function request_keyword($openid, $keyword)
     {
         $eventkey = $this->usage->get_openid_info($openid)->eventkey;
-        $content = $this->request_news($openid, $eventkey, '3', $keyword, '');
+        if (!$eventkey) {
+            $eventkey = 'all';
+        }
+//        $content = $this->request_news($openid, $eventkey, '3', $keyword, '');
 
-        return $content;
+        $flag = false;    //先设置flag，如果news，txt，voice都没有的话，检查flag值，还是false时，输出默认关注显示
+        //检查该关键字回复中是否有图文消息
+        if ($this->check_keyword_message($eventkey, "news", $keyword)) {
+            $flag = true;
+            $this->request_news($openid, $eventkey, '3', $keyword, '');
+//            $this->app->staff->message($content_news)->by('1001@u_hengdian')->to($openid)->send();
+        }
+        if ($this->check_keyword_message($eventkey, "voice", $keyword)) {
+            $flag = true;
+            $this->request_voice($openid, '2', $eventkey, $keyword);
+        }
+        if ($this->check_keyword_message($eventkey, "txt", $keyword)) {
+            $flag = true;
+            $this->request_txt($openid, '2', $eventkey, $keyword);             //直接在查询文本回复时使用客服接口
+        }
+
+        if (!$flag)     //如果该二维码没有对应的关注推送信息
+        {
+            $content = new Text();
+            $content->content = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
+            $this->app->staff->message($content)->by('1001@u_hengdian')->to($openid)->send();
+        }
+
+
+//        return $content;
     }
 
     /**
@@ -133,8 +160,8 @@ class Response
         //检查该二维码下关注回复中是否有图文消息
         if ($this->check_eventkey_message($eventkey, "news", "1")) {
             $flag = true;
-            $content_news = $this->request_news($openid, $eventkey, '1', '', '');
-            $this->app->staff->message($content_news)->by('1001@u_hengdian')->to($openid)->send();
+            $this->request_news($openid, $eventkey, '1', '', '');
+//            $this->app->staff->message($content_news)->by('1001@u_hengdian')->to($openid)->send();
         }
         if ($this->check_eventkey_message($eventkey, "voice", "1")) {
             $flag = true;
@@ -147,8 +174,8 @@ class Response
 
         if (!$flag)     //如果该二维码没有对应的关注推送信息
         {
-            $content_news = $this->request_news($openid, 'all', '1', '', '');
-            $this->app->staff->message($content_news)->to($openid)->send();
+            $this->request_news($openid, 'all', '1', '', '');
+//            $this->app->staff->message($content_news)->to($openid)->send();
         }
 //        return $content;
     }
@@ -234,7 +261,7 @@ class Response
      * @param $focus :   1:关注    0：不关注
      * @return boolkey
      */
-    private function check_keyword_message($eventkey, $type)
+    private function check_keyword_message($eventkey, $type, $keyword)
     {
 //        $db = new DB();
         $flag = false;
@@ -245,7 +272,11 @@ class Response
                     ->where('audit', '1')
                     ->where('del', '0')
                     ->where('online', '1')
-                    ->where('eventkey', $eventkey)
+                    ->where('keyword', 'like', '%' . $keyword . '%')
+                    ->where(function ($query) use ($eventkey) {
+                        $query->where('eventkey', $eventkey)
+                            ->orWhere('eventkey', 'all');
+                    })
                     ->whereDate('startdate', '<=', date('Y-m-d'))
                     ->whereDate('enddate', '>=', date('Y-m-d'))
                     ->first();
@@ -256,7 +287,11 @@ class Response
                 break;
             case "txt":
                 $row_txt = DB::table('wx_txt_request')
-                    ->where('eventkey', $eventkey)
+                    ->where('keyword', 'like', '%' . $keyword . '%')
+                    ->where(function ($query) use ($eventkey) {
+                        $query->where('eventkey', $eventkey)
+                            ->orWhere('eventkey', 'all');
+                    })
                     ->where('online', '1')
                     ->whereDate('start_date', '<=', date('Y-m-d'))
                     ->whereDate('end_date', '>=', date('Y-m-d'))
@@ -268,7 +303,11 @@ class Response
                 break;
             case "voice":
                 $row_voice = DB::table('wx_voice_request')
-                    ->where('eventkey', $eventkey)
+                    ->where('keyword', 'like', '%' . $keyword . '%')
+                    ->where(function ($query) use ($eventkey) {
+                        $query->where('eventkey', $eventkey)
+                            ->orWhere('eventkey', 'all');
+                    })
                     ->where('online', '1')
                     ->whereDate('start_date', '<=', date('Y-m-d'))
                     ->whereDate('end_date', '>=', date('Y-m-d'))
@@ -280,7 +319,11 @@ class Response
                 break;
             case "images":
                 $row_images = DB::table('wx_images_request')
-                    ->where('eventkey', $eventkey)
+                    ->where('keyword', 'like', '%' . $keyword . '%')
+                    ->where(function ($query) use ($eventkey) {
+                        $query->where('eventkey', $eventkey)
+                            ->orWhere('eventkey', 'all');
+                    })
                     ->where('online', '1')
                     ->whereDate('start_date', '<=', date('Y-m-d'))
                     ->whereDate('end_date', '>=', date('Y-m-d'))
@@ -389,11 +432,14 @@ class Response
                 $new->image = "http://weix2.hengdianworld.com/" . $result->picurl;
                 $content[] = $new;
             }
-        } else {
-            $content = new Text();
-            $content->content = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
+            $this->app->staff->message($content)->by('1001@u_hengdian')->to($openid)->send();
         }
-        return $content;
+
+        /*        else {
+                    $content = new Text();
+                    $content->content = "嘟......您的留言已经进入自动留声机，小横横回来后会努力回复你的~\n您也可以拨打400-9999141立刻接通小横横。";
+                }*/
+
     }
 
     /**
@@ -412,13 +458,21 @@ class Response
                     ->where('eventkey', $eventkey)
                     ->where('focus', '1')
                     ->where('online', '1')
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
                     ->orderBy('id', 'desc')
                     ->get();
                 break;
             case 2:
                 $row = DB::table('wx_txt_request')
                     ->where('keyword', 'like', '%' . $keyword . '%')
+                    ->where(function ($query) use ($eventkey) {
+                        $query->where('eventkey', $eventkey)
+                            ->orWhere('eventkey', 'all');
+                    })
                     ->where('online', '1')
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
                     ->orderBy('id', 'desc')
                     ->get();
                 break;
@@ -442,13 +496,21 @@ class Response
                     ->where('eventkey', $eventkey)
                     ->where('online', '1')
                     ->where('focus', '1')
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
                     ->orderBy('id', 'desc')
                     ->get();
                 break;
             case "2":
                 $row = DB::table('wx_voice_request')
                     ->where('keyword', 'like', '%' . $keyword . '%')
+                    ->where(function ($query) use ($eventkey) {
+                        $query->where('eventkey', $eventkey)
+                            ->orWhere('eventkey', 'all');
+                    })
                     ->where('online', '1')
+                    ->whereDate('start_date', '<=', date('Y-m-d'))
+                    ->whereDate('end_date', '>=', date('Y-m-d'))
                     ->orderBy('id', 'desc')
                     ->get();
                 break;
