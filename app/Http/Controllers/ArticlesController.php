@@ -48,7 +48,8 @@ class ArticlesController extends Controller
 //        return $row_news;
 
 
-        $users = User::popular()->active()->orderBy('created_at')->get();
+//        $users = User::popular()->active()->orderBy('created_at')->get();
+        $users=WeChat::publish()->skip(0)->take(2)->get();
         return $users;
     }
 
