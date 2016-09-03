@@ -41,15 +41,15 @@ class ArticlesController extends Controller
 
     public function info()
     {
-       $row_news = DB::table('wx_article')
-            ->where('msgtype', 'news')
+      /* $row_news = WeChat::where('msgtype', 'news')
             ->popular()
-            ->get();
-        return $row_news;
+            ->get();*/
+//        $row_news=User::po
+//        return $row_news;
 
 
-/*        $users = \App\User::popular()->active()->orderBy('created_at')->get();
-        return $users;*/
+        $users = User::popular()->active()->orderBy('created_at')->get();
+        return $users;
     }
 
 
